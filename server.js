@@ -23,6 +23,11 @@ var port = process.env.PORT || portLocal,
     ip   = process.env.IP || ipLocal,
     mongoURL = process.env.MONGODB_URI || "mongodb://localhost/movie";
 
+if(process.env.MONGODB_URI)
+{
+  mongoURL += "?authMode=scram-sha1";
+}
+
 var db = null;
 
 var initDb = function(callback) {
