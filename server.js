@@ -19,13 +19,13 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(methodOv("_method"));
 app.use(expSanitizer()); //must be placed AFTER bodyParser
 
-var port = portLocal,
-    ip   = ipLocal,
+var port = process.env.PORT || portLocal,
+    ip   = process.env.IP || ipLocal,
     mongoURL = "mongodb://localhost/movies";
 
 var db = null;
 
-console.log("Trying to init DB");
+//console.log("Trying to init DB");
 mongoURL = mongoURL || "mongodb://localhost/movies";
 
 /*
@@ -286,7 +286,15 @@ initDb(function(err){
   console.log('Error connecting to Mongo. Message:\n'+err);
 });*/
 
-app.listen(port, ip);
-console.log('Server running on http://%s:%s', ip, port);
+if(process.env.DYNO) //check for the presence of dyno to see if we are on heroku
+{
+  app.listen(port);
+  console.log('Server running on Heroku on port %s', port);
+}
+else //if no DYNO, then we are local
+{
+  app.listen(port, ip);
+  console.log('Server running on http://%s:%s', ip, port);
+}
 
 module.exports = app ;
