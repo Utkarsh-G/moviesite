@@ -15,5 +15,14 @@
   "bugs": {
     "url": "https://github.com/Utkarsh-G/moviesite/issues"
   },
-  "homepage": "https://github.com/Utkarsh-G/moviesite#readme"
+  "homepage": "https://github.com/Utkarsh-G/moviesite#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "express-sanitizer": "^1.0.3",
+    "method-override": "^2.3.10",
+    "mongodb": "^3.0.2",
+    "moviedb": "^0.2.10",
+    "pug": "^2.0.0-rc.4"
+  }
 }

@@ -1,0 +1,15 @@
+doctype html
+html.no-js(lang="en")
+    include ./header.pug
+body
+    include ./menu.pug
+    .ui.main.text.container.segment
+        .ui.huge.header New Blog
+        form(action="/movies", method="POST").ui.form
+            .field
+                label Name
+                input(type="text", name="movie[name]", placeholder="name", required="true")
+            .field
+                label Year
+                input(type="text", name="movie[year]", placeholder="year")
+            input(type="submit").ui.violet.basic.button

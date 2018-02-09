@@ -1,0 +1,16 @@
+doctype html
+html.no-js(lang="en")
+    include ./header.pug
+body
+    include ./menu.pug
+    .ui.container.main.segment
+        h1="All da movies!"
+        if (movies)
+            a(href="/movies/new").item Add Movie
+            each movie, i in movies
+                h2= movie.name
+                - var linkstr = "/movies/" + movie._id;
+                a(href=linkstr) Read More
+        else
+            p No Movies Found
+        

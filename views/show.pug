@@ -1,0 +1,14 @@
+doctype html
+html.no-js(lang="en")
+    include ./header.pug
+body
+    include ./menu.pug
+    .ui.main.container.segment
+        .ui.huge.header #{movie.name}
+        .ui.top.attached.segment
+            .item 
+                .content #{movie.year}
+        a(href="/movies/"+movie._id+"/edit").ui.orange.basic.button Edit
+        form(action="/movies/"+movie._id+"?_method=DELETE", method="POST")
+            button.ui.red.basic.button Delete
+                
