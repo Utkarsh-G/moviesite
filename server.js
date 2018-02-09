@@ -5,9 +5,9 @@ var express       = require('express'),
     mdb           = require('moviedb')('f966801bba64717541e531a67551ed33'),
     methodOv      = require("method-override"),
     expSanitizer  = require("express-sanitizer"),
-    mongodb       = require('mongodb');
+    mongodb       = require('mongodb').MongoClient;
 
-    var ObjectId = mongodb.ObjectID;
+    var ObjectId = require('mongodb').ObjectID;
 
 var ipLocal = '127.0.0.1';
 var portLocal = 8080;
@@ -21,14 +21,10 @@ app.use(expSanitizer()); //must be placed AFTER bodyParser
 
 var port = process.env.PORT || portLocal,
     ip   = process.env.IP || ipLocal,
-    mongoURL = "mongodb://localhost/movies";
+    mongoURL = process.env.MONGODB_URI || "mongodb://localhost/movie";
 
 var db = null;
 
-//console.log("Trying to init DB");
-mongoURL = mongoURL || "mongodb://localhost/movies";
-
-/*
 var initDb = function(callback) {
   if (mongoURL == null) {console.log("mongoURL is null"); return;}
   else {console.log('mongoURL: %s', mongoURL);} 
@@ -43,7 +39,7 @@ var initDb = function(callback) {
       return;
     }
 
-    db = conn;
+    db = conn.db("movienight");
     console.log('Connected to MongoDB at: %s', mongoURL);
 
     if (db) {
@@ -105,9 +101,14 @@ function initMovies(){
 
   // initialize db on server start if it's not already
   // initialized.
-/*if (!db) {
-  initDb(function(err){});
-}*/
+console.log("Trying to init DB");
+
+if (!db) {
+  initDb(function(err){
+    if (err)
+    console.log('Error connecting to Mongo. Message:\n'+err);
+  });
+}
 
 //Landing page / home page
 
@@ -280,8 +281,8 @@ app.use(function(err, req, res, next){
   res.status(500).send('Something bad happened!');
 });
 
-/*
-initDb(function(err){
+
+/*initDb(function(err){
   if (err)
   console.log('Error connecting to Mongo. Message:\n'+err);
 });*/
