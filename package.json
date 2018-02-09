@@ -1,0 +1,19 @@
+{
+  "name": "moviesite",
+  "version": "1.0.0",
+  "description": "Movie Night website for easy movie selection among friends",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Utkarsh-G/moviesite.git"
+  },
+  "author": "Utkarsh Gaur",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Utkarsh-G/moviesite/issues"
+  },
+  "homepage": "https://github.com/Utkarsh-G/moviesite#readme"
+}
