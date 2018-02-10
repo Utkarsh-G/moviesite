@@ -12,4 +12,5 @@ body
             .field
                 label Year
                 input(type="text", name="movie[year]", placeholder="year")
+            input(type="hidden", name="_csrf", value=csrfToken)
             input(type="submit").ui.violet.basic.button

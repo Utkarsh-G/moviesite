@@ -6,7 +6,10 @@ var express       = require('express'),
     methodOv      = require("method-override"),
     expSanitizer  = require("express-sanitizer"),
     mongodb       = require('mongodb').MongoClient,
-    sessions      = require('client-sessions');
+    sessions      = require('client-sessions'),
+    bcrypt        = require('bcryptjs'),
+    csurf         = require('csurf'),
+    dotenv        = require('dotenv').config();
 
     var ObjectId = require('mongodb').ObjectID;
 
@@ -14,7 +17,7 @@ var ipLocal = '127.0.0.1';
 var portLocal = 8080;
 
 var isLogged = false;
-  
+
 app.set('views', './views');
 app.set('view engine', 'pug');
 app.use(express.static("public"));
@@ -23,7 +26,7 @@ app.use(methodOv("_method"));
 app.use(expSanitizer()); //must be placed AFTER bodyParser
 app.use(sessions({
   cookieName:"session",
-  secret:"envVar",
+  secret:process.env.COOKIE_SECRET, //needs to be an env variable
   duration: 30 * 60 * 1000,
   cookie:{
     ephemeral: true,
@@ -31,16 +34,14 @@ app.use(sessions({
     secure: false
   }
 }));
+app.use(csurf());
+
+var hashKeyDB = bcrypt.hashSync(process.env.SITE_PASSKEY, 14); //needs to be env var or database
 
 var port = process.env.PORT || portLocal,
     ip   = process.env.IP || ipLocal,
     mongoURL = process.env.MONGODB_URI || "mongodb://localhost/movie";
-/*
-if(process.env.MONGODB_URI)
-{
-  mongoURL += "?authMode=scram-sha1";
-}
-*/
+
 var db = null;
 
 var initDb = function(callback) {
@@ -155,7 +156,7 @@ if (!db) {
 
 app.get('/', function (req, res) {
   console.log("Routing GET");    
-  res.render('home',{loggedOn:isLogged});
+  res.render('home',{loggedOn:isLogged, csrfToken: req.csrfToken()});
 
 });
 
@@ -194,7 +195,7 @@ app.get("/movies", function(req,res){
 //NEW route
 app.get("/movies/new", function(req,res){
   if(db)
-  res.render("new",{loggedOn: isLogged});
+  res.render("new",{loggedOn: isLogged, csrfToken: req.csrfToken()});
   else
   res.redirect("/movies");
 });
@@ -264,7 +265,7 @@ app.get("/movies/:id/edit", function(req, res){
       {
         console.log("\n\nFound by ID");
         console.log(foundMovie);
-        res.render("edit",{movie: foundMovie, loggedOn: isLogged});
+        res.render("edit",{movie: foundMovie, loggedOn: isLogged, csrfToken: req.csrfToken()});
       }
     });
   }
@@ -329,7 +330,7 @@ app.post("/login", function(req,res){
 
   users = db.collection('users');
 
-  if(req.body.logInfo.key === "test")
+  if(bcrypt.compareSync(req.body.logInfo.key,hashKeyDB))//(req.body.logInfo.key === "test")
   {
     users.insertOne({name:req.body.logInfo.name}, function(err, newUser){
       if(err){
