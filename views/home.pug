@@ -5,3 +5,13 @@ body
     include ./menu.pug
     .ui.main.container.segment
         h1 Welcome to the Movie Night Site!
+    .ui.container
+        form(action="/login", method="POST").ui.form
+            //- csrf token goes here
+            .field
+                label Name
+                input(type="text", name="logInfo[name]", placeholder="name")
+            .field
+                label Passkey
+                input(type="password", name="logInfo[key]", placeholder="passkey", required="true")
+            input(type="submit").ui.violet.basic.button
