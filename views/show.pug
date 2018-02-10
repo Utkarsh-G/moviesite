@@ -10,5 +10,6 @@ body
                 .content #{movie.year}
         a(href="/movies/"+movie._id+"/edit").ui.orange.basic.button Edit
         form(action="/movies/"+movie._id+"?_method=DELETE", method="POST")
+            input(type="hidden", name="_csrf", value=csrfToken)        
             button.ui.red.basic.button Delete
                 

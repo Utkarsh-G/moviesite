@@ -237,7 +237,7 @@ app.get("/movies/:id", function(req,res){
       {
         console.log("\n\nFound by ID");
         console.log(foundMovie);
-        res.render("show",{movie: foundMovie, loggedOn: isLogged});
+        res.render("show",{movie: foundMovie, loggedOn: isLogged, csrfToken: req.csrfToken()});
       }
     });
   }
