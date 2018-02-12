@@ -9,7 +9,7 @@ body
             a(href="/movies/new").item Add Movie
             each movie, i in movies
                 h2=movie.name
-                img(src=base_url+"w500/"+movie.poster_path)
+                img(src=base_url+"w185/"+movie.poster_path)
                 - var linkstr = "/movies/" + movie._id;
                 a(href=linkstr) Read More
         else

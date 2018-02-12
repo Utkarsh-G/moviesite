@@ -164,6 +164,11 @@ if (!db) {
 //Landing page / home page
 
 app.get('/', function (req, res) {
+  if ((req.session && req.session.userID)){
+    console.log("Active session found. Redirecting from home to index.");
+    isLogged = true;
+    return res.redirect("/movies");
+  }
   console.log("Routing GET");    
   var configRequestURL = 'https://api.themoviedb.org/3/configuration?api_key=' + process.env.TMDB_KEY;
   request(configRequestURL, function(error, response, body){
@@ -229,6 +234,7 @@ app.get("/movies", function(req,res){
     console.log("no active session found.");
     return res.redirect("/");
   }
+  isLogged = true;
   console.log(req.session);
   console.log(req.session.userID);
   if(isMovieDataCached)
@@ -281,22 +287,39 @@ app.get("/movies/new", function(req,res){
 app.post("/movies", function(req,res){
   //sanitize input
   req.body.movie.name = req.sanitize(req.body.movie.name);
+  req.body.movie.movie_id = req.sanitize(req.body.movie.movie_id);
   req.body.movie.year = req.sanitize(req.body.movie.year);
-  //create movie
-  movies = db.collection(collectionToUse);
-  movies.insertOne(req.body.movie, function(err, newMov){
-    if(err){
-      console.log("Error in trying to add new movie");
-      console.log(err);
-      res.render("new",{loggedOn: isLogged});
+  reqString = "https://api.themoviedb.org/3/movie/"+req.body.movie.movie_id+"?api_key="+process.env.TMDB_KEY
+
+  request(reqString, function(error, response, body){
+    if(!error && response.statusCode == 200){
+      //create movie
+      movies = db.collection(collectionToUse);
+      movies.insertOne(req.body.movie, function(err, newMov){
+      if(err){
+        console.log("Error in trying to add new movie");
+        console.log(err);
+        res.render("new",{loggedOn: isLogged});
+      }
+      else
+      {
+        //redirect
+        isMovieDataCached = false;
+        res.redirect("/movies");
+      }
+      });
     }
-    else
-    {
-      //redirect
-      isMovieDataCached = false;
-      res.redirect("/movies");
+    if(error){
+      console.log(error);
+      res.send("Womp womp. Something went wrong. Unable to check if TMDB id is correct.");
     }
+    if(response.statusCode !== 200){
+      console.log(response.statusCode);
+      res.send("Something went wrong. Please check if your TMDB ID is valid and try again.");
+    }
+    return null;
   });
+  
 });
 
 //SHOW route

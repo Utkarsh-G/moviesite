@@ -7,6 +7,9 @@ body
         .ui.huge.header New Blog
         form(action="/movies", method="POST").ui.form
             .field
+                label MovieID
+                input(type="text", name="movie[movie_id]", placeholder="TMDB Movie ID", required = "true")
+            .field
                 label Name
                 input(type="text", name="movie[name]", placeholder="name", required="true")
             .field

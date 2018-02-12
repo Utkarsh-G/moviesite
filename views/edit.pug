@@ -5,6 +5,7 @@ body
     include ./menu.pug
     .ui.main.container.segment
         .ui.huge.header Edit #{movie.name}
+        .ui.header Movie ID: #{movie.movie_id}  Cannot be changed.
         form(action="/movies/"+ movie._id +"?_method=PUT", method="POST").ui.form
             .field
                 label Name
