@@ -10,7 +10,8 @@ var express       = require('express'),
     bcrypt        = require('bcryptjs'),
     csurf         = require('csurf'),
     dotenv        = require('dotenv').config(),
-    sslRedirect   = require('heroku-ssl-redirect');
+    sslRedirect   = require('heroku-ssl-redirect'),
+    request       = require('request');
 
     var ObjectId = require('mongodb').ObjectID;
 
@@ -18,6 +19,7 @@ var ipLocal = '127.0.0.1';
 var portLocal = 8080;
 
 var isLogged = false;
+var isMovieDataCached = false;
 
 app.set('views', './views');
 app.set('view engine', 'pug');
@@ -45,6 +47,9 @@ var port = process.env.PORT || portLocal,
     mongoURL = process.env.MONGODB_URI || "mongodb://localhost/movie";
 
 var db = null;
+var collectionToUse = 'movies';
+var base_url = "https://image.tmdb.org/t/p/";
+var movieArray;
 
 var initDb = function(callback) {
   if (mongoURL == null) {console.log("mongoURL is null"); return;}
@@ -70,15 +75,16 @@ var initDb = function(callback) {
   });
 };
 
-var sampleMovies = [{name: "Bladerunner", year: 2017},
-                    {name: "Jumanji2", year: 2017},
-                    {name: "Whiplash", year: 2014}
+var sampleMovies = [{name: "Alien", year: 1979, movie_id: 348},
+                    {name: "The Karate Kid", year: 1984, movie_id: 1885},
+                    {name: "Whiplash", year: 2014, movie_id: 244786},
+                    {name: "Sleepless in Seattle", year: 1993, movie_id:858}
                     ];
 
 function initMovies(){
   if (db)
   {
-    db.collection('movies').insertOne({name: "El laberinto del fauno", year: 2006}, function(err, r){
+    db.collection(collectionToUse).insertOne({name: "El laberinto del fauno", year: 2006}, function(err, r){
       if(err)
       {
         console.log("Failed to insert token movie");
@@ -87,7 +93,7 @@ function initMovies(){
       else
       {
         console.log("Successfully inserted token movie");
-        db.collection('movies').drop(function(err, delOK){
+        db.collection(collectionToUse).drop(function(err, delOK){
           if (err)
           {
             console.log("Failed to delete movies");
@@ -95,7 +101,7 @@ function initMovies(){
           }
           else {
             console.log("Prev movie data deleted successfully. Creating new movie data.");
-            db.collection('movies').insertMany(sampleMovies, function (err, res){
+            db.collection(collectionToUse).insertMany(sampleMovies, function (err, res){
               if (err)
               {
                 console.log("Failed to insert movies");
@@ -154,13 +160,66 @@ if (!db) {
   });
 }
 
+
 //Landing page / home page
 
 app.get('/', function (req, res) {
   console.log("Routing GET");    
-  res.render('home',{loggedOn:isLogged, csrfToken: req.csrfToken()});
-
+  var configRequestURL = 'https://api.themoviedb.org/3/configuration?api_key=' + process.env.TMDB_KEY;
+  request(configRequestURL, function(error, response, body){
+    if(!error && response.statusCode == 200){
+      console.log(body);
+      var info = JSON.parse(body);
+      console.log(info.images.base_url);
+      base_url = info.images.base_url;
+    }
+    if(error){
+      console.log(error);
+    }
+    if(response.statusCode !== 200){
+      console.log(response.statusCode);
+    }
+    return res.render('home',{loggedOn:isLogged, csrfToken: req.csrfToken()});
+  });
 });
+
+function GetMoviePosterPath(movArray, index, res){
+  if(index > -1)
+  {
+    if(!movArray[index].movie_id)
+    {
+      movArray[index].movie_id = 419430;
+    }
+    reqString = "https://api.themoviedb.org/3/movie/"+movArray[index].movie_id+"?api_key="+process.env.TMDB_KEY;
+    request(reqString, function(error, response, body){
+      if(!error && response.statusCode == 200){
+        var info = JSON.parse(body);
+        console.log(info.poster_path);
+
+        movArray[index].poster_path = info.poster_path;
+        
+        GetMoviePosterPath(movArray,index-1,res);
+      }
+      if(error){
+        console.log(error);
+      }
+      if(response.statusCode !== 200){
+        console.log(response.statusCode);
+      }
+      return null;
+    });
+    
+  } else {
+    console.log("printing poster path of 0th object");
+    console.log(movArray[0].poster_path);
+    movieArray = movArray;
+    isMovieDataCached = true;
+    res.render("index", {movies : movArray, loggedOn : isLogged, base_url:base_url});
+  }
+  
+
+}
+
 
 //RESTful Routes ... eventually
 //INDEX route
@@ -172,9 +231,14 @@ app.get("/movies", function(req,res){
   }
   console.log(req.session);
   console.log(req.session.userID);
+  if(isMovieDataCached)
+  {
+    return res.render("index", {movies : movieArray, loggedOn : isLogged, base_url: base_url});
+  }
+
   if (db)
   {
-    movies = db.collection('movies');
+    movies = db.collection(collectionToUse);
     movies.find().toArray(function(err, movArray){
       if(err)
       {
@@ -184,7 +248,18 @@ app.get("/movies", function(req,res){
       }
       else
       {
-        res.render("index", {movies : movArray, loggedOn : isLogged});
+        if(movArray.length < 10 && movArray.length > 1){
+            console.log("array length %d", movArray.length);
+            var index = movArray.length - 1;
+            GetMoviePosterPath(movArray, index,res);
+            //console.log("Sequential? hopefully comes after movie poster path");
+          
+        //console.log();
+        }else{
+          res.send("Too many or too few movies to render");
+          console.log(movArray.length);
+        }
+        
       }
     });
   }
@@ -208,7 +283,7 @@ app.post("/movies", function(req,res){
   req.body.movie.name = req.sanitize(req.body.movie.name);
   req.body.movie.year = req.sanitize(req.body.movie.year);
   //create movie
-  movies = db.collection('movies');
+  movies = db.collection(collectionToUse);
   movies.insertOne(req.body.movie, function(err, newMov){
     if(err){
       console.log("Error in trying to add new movie");
@@ -218,6 +293,7 @@ app.post("/movies", function(req,res){
     else
     {
       //redirect
+      isMovieDataCached = false;
       res.redirect("/movies");
     }
   });
@@ -227,7 +303,7 @@ app.post("/movies", function(req,res){
 app.get("/movies/:id", function(req,res){
   if(db)
   {
-    movies = db.collection('movies');
+    movies = db.collection(collectionToUse);
     movies.findOne({_id: ObjectId(req.params.id)}, function(err, foundMovie){ //_id:req.params.id
       if(err)
       {
@@ -254,7 +330,7 @@ app.get("/movies/:id", function(req,res){
 app.get("/movies/:id/edit", function(req, res){
   if(db)
   {
-    movies = db.collection('movies');
+    movies = db.collection(collectionToUse);
 
     movies.findOne({_id: ObjectId(req.params.id)}, function(err, foundMovie){ //_id:req.params.id
       if(err)
@@ -282,7 +358,7 @@ app.put("/movies/:id", function(req,res){
   //sanitize input
   req.body.movie.name = req.sanitize(req.body.movie.name);
   req.body.movie.year = req.sanitize(req.body.movie.year);
-  movies = db.collection('movies');
+  movies = db.collection(collectionToUse);
   movies.updateOne({_id: ObjectId(req.params.id)}, {$set:{
     name: req.body.movie.name,
     year: req.body.movie.year
@@ -298,6 +374,7 @@ app.put("/movies/:id", function(req,res){
     {
       console.log("\n\nUpdated by ID");
       //redirect
+      isMovieDataCached = false;
       res.redirect("/movies/"+req.params.id);
     }
 
@@ -307,7 +384,7 @@ app.put("/movies/:id", function(req,res){
 // DELETE route
 
 app.delete("/movies/:id", function(req, res){
-  movies = db.collection('movies');
+  movies = db.collection(collectionToUse);
   movies.deleteOne({_id: ObjectId(req.params.id)}, function(err, result){
     if(err)
     {
@@ -319,6 +396,7 @@ app.delete("/movies/:id", function(req, res){
     {
       console.log("\n\nDeleted by ID");
       //redirect
+      isMovieDataCached = false;
       res.redirect("/movies");
     }
 
