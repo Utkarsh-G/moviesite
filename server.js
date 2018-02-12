@@ -69,7 +69,8 @@ var initDb = function(callback) {
     console.log('Connected to MongoDB at: %s', mongoURL);
 
     if (db) {
-      initMovies();
+      initMovies(false, null);
+      initUsers();
     }
 
   });
@@ -81,7 +82,7 @@ var sampleMovies = [{name: "Alien", year: 1979, movie_id: 348},
                     {name: "Sleepless in Seattle", year: 1993, movie_id:858}
                     ];
 
-function initMovies(){
+function initMovies(shouldRedirectToMovies, resHTTP){
   if (db)
   {
     db.collection(collectionToUse).insertOne({name: "El laberinto del fauno", year: 2006}, function(err, r){
@@ -92,6 +93,7 @@ function initMovies(){
       }
       else
       {
+        isMovieDataCached = false;
         console.log("Successfully inserted token movie");
         db.collection(collectionToUse).drop(function(err, delOK){
           if (err)
@@ -109,29 +111,10 @@ function initMovies(){
               }
               else {
                 console.log("New Movie DB ready to go.");
-                db.collection('users').insertOne({name: "Roshan"}, function(err, r){
-                  if(err)
-                  {
-                    console.log("Failed to insert token user");
-                    console.log(err);
-                  }
-                  else
-                  {
-                    console.log("Successfully inserted token users");
-                    db.collection('users').drop(function(err, delOK){
-                      if (err)
-                      {
-                        console.log("Failed to delete users");
-                        console.log(err);
-                      }
-                      else {
-                        console.log("Database Clean");
-                      }
-                  
-                    });
-                  }
-            
-                });          
+                if(shouldRedirectToMovies)
+                {
+                  resHTTP.redirect("/movies");
+                }    
               }
             });
           }
@@ -148,6 +131,43 @@ function initMovies(){
   }
   
 }
+
+function initUsers()
+{
+  if (db)
+  {
+    
+    db.collection('users').insertOne({name: "Roshan"}, function(err, r){
+      if(err)
+      {
+        console.log("Failed to insert token user");
+        console.log(err);
+      }
+      else
+      {
+        console.log("Successfully inserted token users");
+        db.collection('users').drop(function(err, delOK){
+          if (err)
+          {
+            console.log("Failed to delete users");
+            console.log(err);
+          }
+          else {
+            console.log("User Database Clean");
+          }
+      
+        });
+      }
+
+    });          
+              
+  }
+  else 
+  {
+    console.log("no definition for db :(")
+  }
+}
+
 
   // initialize db on server start if it's not already
   // initialized.
@@ -188,7 +208,7 @@ app.get('/', function (req, res) {
   });
 });
 
-function GetMoviePosterPath(movArray, index, res){
+function GetMoviePosterPath(movArray, index, res, req){
   if(index > -1)
   {
     if(!movArray[index].movie_id)
@@ -203,7 +223,7 @@ function GetMoviePosterPath(movArray, index, res){
 
         movArray[index].poster_path = info.poster_path;
         
-        GetMoviePosterPath(movArray,index-1,res);
+        GetMoviePosterPath(movArray,index-1,res, req);
       }
       if(error){
         console.log(error);
@@ -219,7 +239,7 @@ function GetMoviePosterPath(movArray, index, res){
     console.log(movArray[0].poster_path);
     movieArray = movArray;
     isMovieDataCached = true;
-    res.render("index", {movies : movArray, loggedOn : isLogged, base_url:base_url});
+    res.render("index", {movies : movArray, loggedOn : isLogged, base_url:base_url, csrfToken:req.csrfToken()});
   }
   
 
@@ -254,10 +274,10 @@ app.get("/movies", function(req,res){
       }
       else
       {
-        if(movArray.length < 10 && movArray.length > 1){
+        if(movArray.length < 11 && movArray.length > 0){
             console.log("array length %d", movArray.length);
             var index = movArray.length - 1;
-            GetMoviePosterPath(movArray, index,res);
+            GetMoviePosterPath(movArray, index,res, req);
             //console.log("Sequential? hopefully comes after movie poster path");
           
         //console.log();
@@ -277,6 +297,8 @@ app.get("/movies", function(req,res){
 
 //NEW route
 app.get("/movies/new", function(req,res){
+  if(movieArray.length>9)
+  res.send("Currently only supporting 10 movies max. Please delete one before adding new one.");
   if(db)
   res.render("new",{loggedOn: isLogged, csrfToken: req.csrfToken()});
   else
@@ -425,6 +447,12 @@ app.delete("/movies/:id", function(req, res){
 
   });
 });
+
+// RESET route
+app.purge("/movies", function(req, res){
+  initMovies(true,res);
+});
+
 
 //Login
 app.post("/login", function(req,res){

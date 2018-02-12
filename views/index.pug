@@ -12,6 +12,9 @@ body
                 img(src=base_url+"w185/"+movie.poster_path)
                 - var linkstr = "/movies/" + movie._id;
                 a(href=linkstr) Read More
+            form(action="/movies?_method=PURGE", method="POST")
+                input(type="hidden", name="_csrf", value=csrfToken)        
+                button.ui.red.basic.button Reset movie database (!)
         else
             p No Movies Found
         
