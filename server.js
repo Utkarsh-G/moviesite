@@ -9,7 +9,8 @@ var express       = require('express'),
     sessions      = require('client-sessions'),
     bcrypt        = require('bcryptjs'),
     csurf         = require('csurf'),
-    dotenv        = require('dotenv').config();
+    dotenv        = require('dotenv').config(),
+    sslRedirect   = require('heroku-ssl-redirect');
 
     var ObjectId = require('mongodb').ObjectID;
 
@@ -35,6 +36,7 @@ app.use(sessions({
   }
 }));
 app.use(csurf());
+app.use(sslRedirect());
 
 var hashKeyDB = bcrypt.hashSync(process.env.SITE_PASSKEY, 14); //needs to be env var or database
 
