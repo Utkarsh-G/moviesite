@@ -475,6 +475,7 @@ app.post("/login", function(req,res){
         console.log("\nUsername:%s",newUser.ops[0].name);
         console.log("\nid:%s",newUser.ops[0]._id);
         req.session.userID = newUser.ops[0]._id; //want to hash it tbh
+        req.session.userName = newUser.ops[0].name;
         isLogged = true;
         res.redirect("/movies");
       }
@@ -486,6 +487,8 @@ app.post("/login", function(req,res){
   }
   
 });
+
+//Logout
 
 app.get("/logout", (req,res)=>{
   if(req.session){
@@ -501,6 +504,57 @@ app.use(function(err, req, res, next){
   res.status(500).send('Something bad happened!');
 });
 
+//vote
+
+app.post("/movies/:id/vote", (req,res)=>{
+  movies = db.collection(collectionToUse);
+
+  movies = db.collection(collectionToUse);
+
+  movies.findOne({_id: ObjectId(req.params.id)}, function(err, foundMovie){ //_id:req.params.id
+    if(err)
+    {
+      console.log("\n\nError in finding movie by id when trying to vote");
+      console.log(err);
+      res.send("Vote not registered (Movie not found). Woopsie");
+    }
+    else
+    {
+      console.log("\n\nFound by ID");
+      console.log(foundMovie);
+      var voters = [];
+      if(foundMovie.voters)
+        {
+          voters = foundMovie.voters; 
+          if(voters.length<21)
+          voters.push(req.session.userName);
+        }
+      else
+        voters =[req.session.userName];
+
+      movies.updateOne({_id: ObjectId(req.params.id)}, {$set:{
+        voters:voters
+      }}, function(err, r){
+        if(err)
+        {
+          console.log("\n\nError in updating movie voter list");
+          console.log(err);
+          res.send("Vote not registered (update error). Woopsie.");
+        }
+        else
+        {
+          console.log("\n\nUpdated by ID");
+          //redirect
+          isMovieDataCached = false;
+          res.redirect("/movies");
+        }
+    
+      });
+      
+    }
+  });
+
+});
 
 /*initDb(function(err){
   if (err)
