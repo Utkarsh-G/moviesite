@@ -3,15 +3,17 @@ html.no-js(lang="en")
     include ./header.pug
 body
     include ./menu.pug
-    .ui.main.container.segment
-        .ui.huge.header #{movie.name}
-        .ui.top.attached.segment
+    .ui.one.column.stackable.center.aligned.page.grid
+        .column.eight.wide
+            .ui.huge.header #{movie.name}
+            //-.image
+                img(src=base_url+"w342/"+movie.poster_path)
             .item
                 .content Movie ID on TMDB: #{movie.movie_id}
             if(movie.year)
                 .item 
                     .content Year of release: #{movie.year}
-        a(href="/movies/"+movie._id+"/edit").ui.orange.basic.button Edit
-        form(action="/movies/"+movie._id+"?_method=DELETE", method="POST")
-            input(type="hidden", name="_csrf", value=csrfToken)        
-            button.ui.red.basic.button Delete
+            a(href="/movies/"+movie._id+"/edit").ui.orange.basic.fluid.button Edit
+            form(action="/movies/"+movie._id+"?_method=DELETE", method="POST")
+                input(type="hidden", name="_csrf", value=csrfToken)        
+                button.ui.red.basic.fluid.button Delete

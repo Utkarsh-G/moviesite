@@ -3,16 +3,20 @@ html.no-js(lang="en")
     include ./header.pug
 body
     include ./menu.pug
-    .ui.main.container.segment
-        h1 Welcome to the Movie Night Site!
-    .ui.container
-        form(action="/login", method="POST").ui.form
-            //- csrf token goes here
-            .field
-                label Name
-                input(type="text", name="logInfo[name]", placeholder="name", required="true")
-            .field
-                label Passkey
-                input(type="password", name="logInfo[key]", placeholder="passkey", required="true")
-            input(type="hidden", name="_csrf", value=csrfToken)            
-            input(type="submit").ui.violet.basic.button
+    .ui.one.column.stackable.center.aligned.page.grid
+        .column.twelve.wide
+            h1 Welcome to the Movie Night Site!
+            .ui.red.message
+                .header This site is in a state of continuous improvement
+                p Comments / suggestions welcome. Project can be found on #[a(href="https://github.com/Utkarsh-G/moviesite.git") GitHub]
+            form(action="/login", method="POST").ui.form
+                //- csrf token goes here
+                .field
+                    label Name (any identifier)
+                    input(type="text", name="logInfo[name]", placeholder="name", required="true")
+                .field
+                    label Passkey (given by site-owner)
+                    input(type="password", name="logInfo[key]", placeholder="passkey", required="true")
+                input(type="hidden", name="_csrf", value=csrfToken)            
+                input(type="submit").ui.violet.basic.button
+            p#copyright Copyright @ Utkarsh Gaur, 2018

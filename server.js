@@ -76,9 +76,9 @@ var initDb = function(callback) {
   });
 };
 
-var sampleMovies = [{name: "Alien", year: 1979, movie_id: 348},
+var sampleMovies = [{name: "Alien", year: 1979, movie_id: 348, voters:["Utkarsh"]},
                     {name: "The Karate Kid", year: 1984, movie_id: 1885},
-                    {name: "Whiplash", year: 2014, movie_id: 244786},
+                    {name: "Whiplash", year: 2014, movie_id: 244786, voters:["Mike","Meng"]},
                     {name: "Sleepless in Seattle", year: 1993, movie_id:858}
                     ];
 
@@ -259,7 +259,7 @@ app.get("/movies", function(req,res){
   console.log(req.session.userID);
   if(isMovieDataCached)
   {
-    return res.render("index", {movies : movieArray, loggedOn : isLogged, base_url: base_url});
+    return res.render("index", {movies : movieArray, loggedOn : isLogged, base_url: base_url, csrfToken:req.csrfToken()});
   }
 
   if (db)
@@ -360,7 +360,7 @@ app.get("/movies/:id", function(req,res){
       {
         console.log("\n\nFound by ID");
         console.log(foundMovie);
-        res.render("show",{movie: foundMovie, loggedOn: isLogged, csrfToken: req.csrfToken()});
+        res.render("show",{movie: foundMovie, loggedOn: isLogged, base_url:base_url, csrfToken: req.csrfToken()});
       }
     });
   }

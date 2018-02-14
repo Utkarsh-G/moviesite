@@ -1,5 +1,6 @@
 body {
     background: yellowgreen;
+    margin-top: 60px;
 }
 
 i.icon{
@@ -8,4 +9,24 @@ i.icon{
 
 .main.container {
     margin-top: 7.0em;
+}
+
+#addMovie{
+    margin-bottom: 20px;
+}
+
+#resetForm{
+    margin-top: 10px;
+}
+
+ #selectedBy{
+    margin-bottom: 2px;
+} 
+
+.card{
+    border: 0px;
+}
+
+#copyright{
+    margin-top:30px;
 }
