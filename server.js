@@ -300,7 +300,9 @@ app.get("/movies/new", function(req,res){
   if(movieArray.length>9)
   res.send("Currently only supporting 10 movies max. Please delete one before adding new one.");
   if(db)
-  res.render("new",{loggedOn: isLogged, csrfToken: req.csrfToken()});
+  {
+    res.render("new",{loggedOn: isLogged, searches:req.session.searches, csrfToken: req.csrfToken()});
+  }
   else
   res.redirect("/movies");
 });
@@ -554,6 +556,45 @@ app.post("/movies/:id/vote", (req,res)=>{
     }
   });
 
+});
+
+//Search
+app.post("/movies/search", (req,res)=>{
+  //console.log(req.body.movieName);
+  var options = { method: 'GET',
+  url: 'https://api.themoviedb.org/3/search/movie',
+  qs: 
+   { year: req.body.movieYear,
+     include_adult: 'false',
+     page: '1',
+     query: req.body.movieName,
+     language: 'en-US',
+     api_key: process.env.TMDB_KEY },
+  body: '{}' };
+
+request(options, function (error, response, body) {
+  if (error) {console.log(error);}
+  else
+  {
+    var info = JSON.parse(body);
+    console.log(info.results[0].title);
+    console.log(info.results[0].id);
+    console.log(info.results[0].release_date);
+    var searches= [];
+    var maxCount = (info.total_results > 3) ? 3 : info.total_results;
+    for (var i = 0; i < maxCount; i++)
+    {
+      var search = {
+        name:info.results[i].title,
+        ID:info.results[i].id,
+        date:info.results[i].release_date
+      };
+      searches.push(search);
+    }
+    req.session.searches = searches;
+    res.redirect("/movies/new");
+  }
+});
 });
 
 /*initDb(function(err){

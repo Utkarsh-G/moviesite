@@ -4,16 +4,27 @@ html.no-js(lang="en")
 body
     include ./menu.pug
     .ui.main.text.container.segment
-        .ui.huge.header New Blog
+        .ui.huge.header Search for ID
+        form(action="/movies/search", method="POST").ui.form
+            .field
+                label Name
+                input(type="text", name="movieName", placeholder="name", required="true")
+            .field
+                label Year (Optional)
+                input(type="text", name="movieYear", placeholder="year")
+            input(type="hidden", name="_csrf", value=csrfToken)
+            input(type="submit").ui.violet.basic.button
+        if(searches && searches.length > 0)
+            each search in searches
+                .ui.segment
+                    p Movie Name: #{search.name}
+                    p Release Date: #{search.date}
+                    p ID to Add Movie: #{search.ID}
+        .ui.huge.header Add Movie
         form(action="/movies", method="POST").ui.form
             .field
                 label MovieID
                 input(type="text", name="movie[movie_id]", placeholder="TMDB Movie ID", required = "true")
-            .field
-                label Name
-                input(type="text", name="movie[name]", placeholder="name", required="true")
-            .field
-                label Year
-                input(type="text", name="movie[year]", placeholder="year")
             input(type="hidden", name="_csrf", value=csrfToken)
             input(type="submit").ui.violet.basic.button
+        
