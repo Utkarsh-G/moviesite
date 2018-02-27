@@ -257,6 +257,7 @@ app.get("/movies", function(req,res){
   isLogged = true;
   console.log(req.session);
   console.log(req.session.userID);
+  req.session.searches = null;
   if(isMovieDataCached)
   {
     return res.render("index", {movies : movieArray, loggedOn : isLogged, base_url: base_url, csrfToken:req.csrfToken()});
@@ -301,7 +302,7 @@ app.get("/movies/new", function(req,res){
   res.send("Currently only supporting 10 movies max. Please delete one before adding new one.");
   if(db)
   {
-    res.render("new",{loggedOn: isLogged, searches:req.session.searches, csrfToken: req.csrfToken()});
+    res.render("new",{loggedOn: isLogged, base_url: base_url, searches:req.session.searches, csrfToken: req.csrfToken()});
   }
   else
   res.redirect("/movies");
@@ -309,17 +310,20 @@ app.get("/movies/new", function(req,res){
 
 //CREATE route
 app.post("/movies", function(req,res){
-  //sanitize input
-  req.body.movie.name = req.sanitize(req.body.movie.name);
-  req.body.movie.movie_id = req.sanitize(req.body.movie.movie_id);
-  req.body.movie.year = req.sanitize(req.body.movie.year);
-  reqString = "https://api.themoviedb.org/3/movie/"+req.body.movie.movie_id+"?api_key="+process.env.TMDB_KEY
+  reqString = "https://api.themoviedb.org/3/movie/"+req.body.ID+"?api_key="+process.env.TMDB_KEY
 
   request(reqString, function(error, response, body){
     if(!error && response.statusCode == 200){
       //create movie
+      var info = JSON.parse(body);
+      var movie = {
+        movie_id : info.id,
+        name : info.title,
+        year : info.release_date
+      };
+
       movies = db.collection(collectionToUse);
-      movies.insertOne(req.body.movie, function(err, newMov){
+      movies.insertOne(movie, function(err, newMov){
       if(err){
         console.log("Error in trying to add new movie");
         console.log(err);
@@ -360,9 +364,32 @@ app.get("/movies/:id", function(req,res){
       }
       else
       {
-        console.log("\n\nFound by ID");
-        console.log(foundMovie);
-        res.render("show",{movie: foundMovie, loggedOn: isLogged, base_url:base_url, csrfToken: req.csrfToken()});
+        reqString = "https://api.themoviedb.org/3/movie/"+foundMovie.movie_id+"?api_key="+process.env.TMDB_KEY
+
+        request(reqString, function(error, response, body){
+          if(!error && response.statusCode == 200){
+            var info = JSON.parse(body);
+            var movie = {
+              poster_path : info.poster_path,
+              name : info.title,
+              year : info.release_date,
+              runtime : info.runtime,
+              overview : info.overview,
+              _id : foundMovie._id
+            };
+            console.log("Showing movie info for Show route from TMDB:");
+            console.log(movie);
+            res.render("show",{movie: movie, loggedOn: isLogged, base_url:base_url, csrfToken: req.csrfToken()});
+
+          }
+          else
+          {
+            console.log("\n\nFound by ID in local db but not TMDB");
+            console.log(foundMovie);
+            res.render("show",{movie: foundMovie, loggedOn: isLogged, base_url:base_url, csrfToken: req.csrfToken()});
+          }
+        });
+        
       }
     });
   }
@@ -581,13 +608,14 @@ request(options, function (error, response, body) {
     console.log(info.results[0].id);
     console.log(info.results[0].release_date);
     var searches= [];
-    var maxCount = (info.total_results > 3) ? 3 : info.total_results;
+    var maxCount = (info.total_results > 5) ? 5 : info.total_results;
     for (var i = 0; i < maxCount; i++)
     {
       var search = {
         name:info.results[i].title,
         ID:info.results[i].id,
-        date:info.results[i].release_date
+        date:info.results[i].release_date,
+        poster_path:info.results[i].poster_path
       };
       searches.push(search);
     }
