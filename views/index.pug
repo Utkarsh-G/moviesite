@@ -27,9 +27,10 @@ body
                                 .ui.black.left.floated.label Selected by:
                                 each voter, j in movie.voters
                                     .ui.right.floated.label #{voter}
-            form(action="/movies?_method=PURGE", method="POST").ui.form#resetForm
-                input(type="hidden", name="_csrf", value=csrfToken)        
-                button.ui.red.basic.button Reset movie database (!)
+            if (displayReset)
+                form(action="/movies?_method=PURGE", method="POST").ui.form#resetForm
+                    input(type="hidden", name="_csrf", value=csrfToken)        
+                    button.ui.red.basic.button Reset movie database (!)
             img(src="/TMDBlogo.png").ui.small.right.floated.image
         else
             p No Movies Found
