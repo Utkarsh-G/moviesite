@@ -20,7 +20,6 @@ body
                 if(movie.year)
                     .item 
                         .content Year of release: #{movie.year}
-            //-a(href="/movies/"+movie._id+"/edit").ui.orange.basic.fluid.button Edit
             form(action="/movies/"+movie._id+"?_method=DELETE", method="POST")
                 input(type="hidden", name="_csrf", value=csrfToken)        
                 button.ui.red.basic.fluid.button Delete

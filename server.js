@@ -18,9 +18,6 @@ var express       = require('express'),
 var ipLocal = '127.0.0.1';
 var portLocal = 8080;
 
-//var isLogged = false;
-//var isMovieDataCached = false;
-
 app.set('views', './views');
 app.set('view engine', 'pug');
 app.use(express.static("public"));
@@ -50,7 +47,6 @@ var port = process.env.PORT || portLocal,
 var db = null;
 var collectionToUse = 'movies';
 var base_url = "https://image.tmdb.org/t/p/";
-//var movieArray;
 
 var initDb = function(callback) {
   if (mongoURL == null) {console.log("mongoURL is null"); return;}
@@ -95,7 +91,6 @@ function initMovies(shouldRedirectToMovies, resHTTP){
       }
       else
       {
-        //isMovieDataCached = false;
         console.log("Successfully inserted token movie");
         db.collection(collectionToUse).drop(function(err, delOK){
           if (err)
@@ -117,21 +112,6 @@ function initMovies(shouldRedirectToMovies, resHTTP){
                 },()=>{console.log("failed to add third init movie");},null,"movies");
               },()=>{console.log("failed to add second init movie");},null,"movies");
             },()=>{console.log("failed to add first init movie");},null,"movies");
-            
-            /*db.collection(collectionToUse).insertMany(sampleMovies, function (err, res){
-              if (err)
-              {
-                console.log("Failed to insert movies");
-                console.log(err);
-              }
-              else {
-                console.log("New Movie DB ready to go.");
-                if(shouldRedirectToMovies)
-                {
-                  resHTTP.redirect("/movies");
-                }    
-              }
-            });*/
           }
       
         });
@@ -183,28 +163,6 @@ function initUsers()
   }
 }
 
-//Only run in between movie nights. 
-/*
-function initMovieNights(){
-  if (db)
-  {
-    db.collection("movienights").insertMany(
-      [{moviesDBname: "movies", hashkey: hashKeyDB},
-      {moviesDBname: "moviesMarch18", hashkey: hashKeyDB2}],
-       function(err, r){
-      if(err)
-      {
-        console.log("Failed to insert movie nights info");
-        console.log(err);
-      }
-      else
-      { 
-        console.log("Successfully inserted MovieNights db info");
-      }});
-    }};
-*/
-  // initialize db on server start if it's not already
-  // initialized.
 console.log("Trying to init DB");
 
 if (!db) {
@@ -219,49 +177,6 @@ if (!db) {
 
 require('./routes/home')(app);
 
-
-
-/*
-
-function GetMoviePosterPath(movArray, index, res, req){
-  if(index > -1)
-  {
-    if(!movArray[index].movie_id)
-    {
-      movArray[index].movie_id = 419430;
-    }
-    reqString = "https://api.themoviedb.org/3/movie/"+movArray[index].movie_id+"?api_key="+process.env.TMDB_KEY;
-    request(reqString, function(error, response, body){
-      if(!error && response.statusCode == 200){
-        var info = JSON.parse(body);
-        console.log(info.poster_path);
-
-        movArray[index].poster_path = info.poster_path;
-        
-        GetMoviePosterPath(movArray,index-1,res, req);
-      }
-      if(error){
-        console.log(error);
-      }
-      if(response.statusCode !== 200){
-        console.log(response.statusCode);
-      }
-      return null;
-    });
-    
-  } else {
-    console.log("printing poster path of 0th object");
-    console.log(movArray[0].poster_path);
-    movieArray = movArray;
-    //isMovieDataCached = true;
-    res.render("index", {movies : movArray, loggedOn : isLogged, base_url:base_url, csrfToken:req.csrfToken()});
-  }
-  
-
-}
-*/
-
-
 //RESTful Routes ... eventually
 //INDEX route
 app.get("/movies", function(req,res){
@@ -274,10 +189,6 @@ app.get("/movies", function(req,res){
   console.log(req.session);
   console.log(req.session.userID);
   req.session.searches = null;
-  /*if(isMovieDataCached)
-  {
-    return res.render("index", {movies : movieArray, loggedOn : isLogged, base_url: base_url, csrfToken:req.csrfToken()});
-  }*/
 
   if (db)
   {
@@ -292,19 +203,6 @@ app.get("/movies", function(req,res){
       }
       else
       {
-        /*
-        if(movArray.length < 11 && movArray.length > 0){
-            console.log("array length %d", movArray.length);
-            var index = movArray.length - 1;
-            GetMoviePosterPath(movArray, index,res, req);
-            //console.log("Sequential? hopefully comes after movie poster path");
-          
-        //console.log();
-        }else{
-          res.send("Too many or too few movies to render");
-          console.log(movArray.length);
-        }
-        */
         var hasDisplayReset = (req.session.movieDBname === "movies") || (req.session.userName === "Utkarsh Gaur");
         return res.render("index", {movies : movArray, displayReset: hasDisplayReset, loggedOn : isLogged, base_url: base_url, csrfToken:req.csrfToken()});
         
@@ -344,12 +242,6 @@ app.get("/movies/new", function(req,res){
 //CREATE route
 app.post("/movies", function(req,res){
   console.log("in create's post route");
-  
-  /*if(addMovieFromTMDB(req.body.ID))
-  {res.redirect("/movies");}
-  else{
-  res.redirect("/movies/new");
-  }*/
 
   addMovieFromTMDB(req.body.ID, (res)=>{
     res.redirect("/movies");
@@ -380,15 +272,11 @@ function addMovieFromTMDB(movie_id, funcIfSuccess, funcIfFail, PostRes, movieDBn
         console.log("Error in trying to add new movie");
         console.log(err);
         return false;
-        //res.render("new",{loggedOn: isLogged});
         funcIfFail(PostRes);
       }
       else
       {
-        //redirect
         console.log("Successfully inserted movie. Trying to return true.")
-        //isMovieDataCached = false;
-        //res.redirect("/movies");
         funcIfSuccess(PostRes);
       }
       });
@@ -426,37 +314,9 @@ app.get("/movies/:id", function(req,res){
       }
       else
       {
-
         console.log("Showing movie info for Show route from our DB:");
         console.log(foundMovie);
-        res.render("show",{movie: foundMovie, loggedOn: isLogged, base_url:base_url, csrfToken: req.csrfToken()});
-        /*
-        reqString = "https://api.themoviedb.org/3/movie/"+foundMovie.movie_id+"?api_key="+process.env.TMDB_KEY
-
-        request(reqString, function(error, response, body){
-          if(!error && response.statusCode == 200){
-            var info = JSON.parse(body);
-            var movie = {
-              poster_path : info.poster_path,
-              name : info.title,
-              year : info.release_date,
-              runtime : info.runtime,
-              overview : info.overview,
-              _id : foundMovie._id
-            };
-            console.log("Showing movie info for Show route from TMDB:");
-            console.log(movie);
-            res.render("show",{movie: movie, loggedOn: isLogged, base_url:base_url, csrfToken: req.csrfToken()});
-
-          }
-          else
-          {
-            console.log("\n\nFound by ID in local db but not TMDB");
-            console.log(foundMovie);
-            res.render("show",{movie: foundMovie, loggedOn: isLogged, base_url:base_url, csrfToken: req.csrfToken()});
-          }
-        });*/
-        
+        res.render("show",{movie: foundMovie, loggedOn: isLogged, base_url:base_url, csrfToken: req.csrfToken()});        
       }
     });
   }
@@ -540,8 +400,6 @@ app.delete("/movies/:id", function(req, res){
     else
     {
       console.log("\n\nDeleted by ID");
-      //redirect
-      //isMovieDataCached = false;
       res.redirect("/movies");
     }
 
@@ -562,7 +420,6 @@ app.purge("/movies", function(req, res){
       }
       else
       {
-        //isMovieDataCached = false;
         console.log("Successfully inserted token movie");
         db.collection(req.session.movieDBname).drop(function(err, delOK){
           if (err)
@@ -623,7 +480,6 @@ app.post("/login", function(req,res){
           req.session.userID = newUser.ops[0]._id; //want to hash it tbh
           req.session.userName = newUser.ops[0].name;
           req.session.movieDBname = movieDBname;
-          //isLogged = true;
           res.redirect("/movies");
         }
       });
@@ -632,38 +488,8 @@ app.post("/login", function(req,res){
     {
       console.log("Incorrect login");
       res.redirect("/");
-
     }
-    
-
   });
-
-  /*
-  if(bcrypt.compareSync(req.body.logInfo.key,hashKeyDB))//(req.body.logInfo.key === "test")
-  {
-    users.insertOne({name:req.body.logInfo.name}, function(err, newUser){
-      if(err){
-        console.log("Error in trying to add new user");
-        console.log(err);
-        res.redirect("/");
-      }
-      else 
-      {
-        console.log("Success adding new user");
-        console.log("\nUsername:%s",newUser.ops[0].name);
-        console.log("\nid:%s",newUser.ops[0]._id);
-        req.session.userID = newUser.ops[0]._id; //want to hash it tbh
-        req.session.userName = newUser.ops[0].name;
-        //isLogged = true;
-        res.redirect("/movies");
-      }
-    });
-  }
-  else
-  {
-    res.redirect("/");
-  }
-  */
 });
 
 //Logout
@@ -671,7 +497,6 @@ app.post("/login", function(req,res){
 app.get("/logout", (req,res)=>{
   if(req.session){
     req.session.reset();
-    //isLogged = false;
   }
   res.redirect("/");
 })
@@ -721,8 +546,6 @@ app.post("/movies/:id/vote", (req,res)=>{
         else
         {
           console.log("\n\nUpdated by ID");
-          //redirect
-          //isMovieDataCached = false;
           res.redirect("/movies");
         }
     
@@ -735,7 +558,7 @@ app.post("/movies/:id/vote", (req,res)=>{
 
 //Search
 app.post("/movies/search", (req,res)=>{
-  //console.log(req.body.movieName);
+
   var options = { method: 'GET',
   url: 'https://api.themoviedb.org/3/search/movie',
   qs: 
@@ -752,9 +575,6 @@ request(options, function (error, response, body) {
   else
   {
     var info = JSON.parse(body);
-    //console.log(info.results[0].title);
-    //console.log(info.results[0].id);
-    //console.log(info.results[0].release_date);
     var searches= [];
     var maxCount = (info.total_results > 5) ? 5 : info.total_results;
     for (var i = 0; i < maxCount; i++)
@@ -772,11 +592,6 @@ request(options, function (error, response, body) {
   }
 });
 });
-
-/*initDb(function(err){
-  if (err)
-  console.log('Error connecting to Mongo. Message:\n'+err);
-});*/
 
 if(process.env.DYNO) //check for the presence of dyno to see if we are on heroku
 {

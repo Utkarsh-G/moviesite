@@ -15,7 +15,6 @@ body
                         .image
                             img(src=base_url+"w185/"+movie.poster_path)
                         - var linkstr = "/movies/" + movie._id;
-                        //-a(href=linkstr).ui.blue.basic.fluid.button Read More
                         form(action="/movies/"+movie._id, method="GET")
                             input(type="hidden", name="_csrf", value=csrfToken)        
                             button.ui.blue.basic.fluid.button Read More
