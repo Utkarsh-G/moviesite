@@ -41,6 +41,7 @@ app.use(csurf());
 app.use(sslRedirect());
 
 var hashKeyDB = bcrypt.hashSync(process.env.SITE_PASSKEY, 14); //needs to be env var or database
+var hashKeyDB2 = bcrypt.hashSync(process.env.SITE_PASSKEY2, 14);
 
 var port = process.env.PORT || portLocal,
     ip   = process.env.IP || ipLocal,
@@ -71,6 +72,7 @@ var initDb = function(callback) {
     if (db) {
       initMovies(false, null);
       initUsers();
+      //initMovieNights();
     }
 
   });
@@ -103,7 +105,18 @@ function initMovies(shouldRedirectToMovies, resHTTP){
           }
           else {
             console.log("Prev movie data deleted successfully. Creating new movie data.");
-            db.collection(collectionToUse).insertMany(sampleMovies, function (err, res){
+            
+            addMovieFromTMDB(348, ()=>{
+              addMovieFromTMDB(284054, ()=>{
+                addMovieFromTMDB(244786, ()=>{
+                  addMovieFromTMDB(858, ()=>{
+                    console.log("successfully added all four init movies");
+                  },()=>{console.log("failed to add fourth init movie");},null);
+                },()=>{console.log("failed to add third init movie");},null);
+              },()=>{console.log("failed to add second init movie");},null);
+            },()=>{console.log("failed to add first init movie");},null);
+            
+            /*db.collection(collectionToUse).insertMany(sampleMovies, function (err, res){
               if (err)
               {
                 console.log("Failed to insert movies");
@@ -116,7 +129,7 @@ function initMovies(shouldRedirectToMovies, resHTTP){
                   resHTTP.redirect("/movies");
                 }    
               }
-            });
+            });*/
           }
       
         });
@@ -168,7 +181,26 @@ function initUsers()
   }
 }
 
-
+//Only run in between movie nights. 
+/*
+function initMovieNights(){
+  if (db)
+  {
+    db.collection("movienights").insertMany(
+      [{moviesDBname: "movies", hashkey: hashKeyDB},
+      {moviesDBname: "moviesMarch18", hashkey: hashKeyDB2}],
+       function(err, r){
+      if(err)
+      {
+        console.log("Failed to insert movie nights info");
+        console.log(err);
+      }
+      else
+      { 
+        console.log("Successfully inserted MovieNights db info");
+      }});
+    }};
+*/
   // initialize db on server start if it's not already
   // initialized.
 console.log("Trying to init DB");
@@ -183,30 +215,11 @@ if (!db) {
 
 //Landing page / home page
 
-app.get('/', function (req, res) {
-  if ((req.session && req.session.userID)){
-    console.log("Active session found. Redirecting from home to index.");
-    isLogged = true;
-    return res.redirect("/movies");
-  }
-  console.log("Routing GET");    
-  var configRequestURL = 'https://api.themoviedb.org/3/configuration?api_key=' + process.env.TMDB_KEY;
-  request(configRequestURL, function(error, response, body){
-    if(!error && response.statusCode == 200){
-      console.log(body);
-      var info = JSON.parse(body);
-      console.log(info.images.base_url);
-      base_url = info.images.base_url;
-    }
-    if(error){
-      console.log(error);
-    }
-    if(response.statusCode !== 200){
-      console.log(response.statusCode);
-    }
-    return res.render('home',{loggedOn:isLogged, csrfToken: req.csrfToken()});
-  });
-});
+require('./routes/home')(app);
+
+
+
+
 
 function GetMoviePosterPath(movArray, index, res, req){
   if(index > -1)
@@ -310,7 +323,23 @@ app.get("/movies/new", function(req,res){
 
 //CREATE route
 app.post("/movies", function(req,res){
-  reqString = "https://api.themoviedb.org/3/movie/"+req.body.ID+"?api_key="+process.env.TMDB_KEY
+  console.log("in create's post route");
+  
+  /*if(addMovieFromTMDB(req.body.ID))
+  {res.redirect("/movies");}
+  else{
+  res.redirect("/movies/new");
+  }*/
+
+  addMovieFromTMDB(req.body.ID, (res)=>{
+    res.redirect("/movies");
+  },(res)=>{
+    res.redirect("/movies/new");
+  },res);
+});
+
+function addMovieFromTMDB(movie_id, funcIfSuccess, funcIfFail, PostRes){
+  reqString = "https://api.themoviedb.org/3/movie/"+movie_id+"?api_key="+process.env.TMDB_KEY
 
   request(reqString, function(error, response, body){
     if(!error && response.statusCode == 200){
@@ -319,7 +348,10 @@ app.post("/movies", function(req,res){
       var movie = {
         movie_id : info.id,
         name : info.title,
-        year : info.release_date
+        year : info.release_date,
+        poster_path : info.poster_path,
+        runtime : info.runtime,
+        overview : info.overview,
       };
 
       movies = db.collection(collectionToUse);
@@ -327,28 +359,33 @@ app.post("/movies", function(req,res){
       if(err){
         console.log("Error in trying to add new movie");
         console.log(err);
-        res.render("new",{loggedOn: isLogged});
+        return false;
+        //res.render("new",{loggedOn: isLogged});
+        funcIfFail(PostRes);
       }
       else
       {
         //redirect
+        console.log("Successfully inserted movie. Trying to return true.")
         isMovieDataCached = false;
-        res.redirect("/movies");
+        //res.redirect("/movies");
+        funcIfSuccess(PostRes);
       }
       });
     }
-    if(error){
-      console.log(error);
-      res.send("Womp womp. Something went wrong. Unable to check if TMDB id is correct.");
+    else {
+      if(error){
+        console.log(error);
+        console.log("Womp womp. Something went wrong when trying to add movie. Unable to check if TMDB id is correct.");
+      }
+      if(response.statusCode !== 200){
+        console.log(response.statusCode);
+        console.log("Something went wrong when trying to add movie. Please check if your TMDB ID is valid and try again.");
+      }
+      funcIfFail();
     }
-    if(response.statusCode !== 200){
-      console.log(response.statusCode);
-      res.send("Something went wrong. Please check if your TMDB ID is valid and try again.");
-    }
-    return null;
   });
-  
-});
+}
 
 //SHOW route
 app.get("/movies/:id", function(req,res){
