@@ -1,8 +1,7 @@
-var request       = require('request');
+var mdb = require('../services/database');
+var base_url = "https://image.tmdb.org/t/p/";
 
-module.exports = (app, db, collectionToUse) => { 
-  //RESTful Routes ... eventually
-  //INDEX route
+module.exports = (mongodb, app) => { 
   app.get("/movies", function(req,res){
     console.log("entering /movies route");
     if (!(req.session && req.session.userID)){
@@ -13,79 +12,31 @@ module.exports = (app, db, collectionToUse) => {
     console.log(req.session);
     console.log(req.session.userID);
     req.session.searches = null;
-    if(isMovieDataCached)
-    {
-      return res.render("index", {movies : movieArray, loggedOn : isLogged, base_url: base_url, csrfToken:req.csrfToken()});
-    }
-  
-    if (db)
-    {
-      movies = db.collection(collectionToUse);
-      movies.find().toArray(function(err, movArray){
-        if(err)
+
+        var db = mdb.GetDB();
+        if (db)
         {
-          console.log(err);
-          res.render("index", {movies:null, loggedOn: isLogged});
-          return;
+          movies = db.collection(req.session.movieDBname);
+          movies.find().toArray(function(err, movArray){
+            if(err)
+            {
+              console.log("error in finding movie array from local db:");
+              console.log(err);
+              res.render("index", {movies:null, loggedOn: isLogged});
+              return;
+            }
+            else
+            {
+              var hasDisplayReset = (req.session.movieDBname === "movies") || (req.session.userName === "Utkarsh Gaur");
+              return res.render("index", {movies : movArray, displayReset: hasDisplayReset, loggedOn : isLogged, base_url: base_url, csrfToken:req.csrfToken()});
+              
+            }
+          });
         }
         else
         {
-          if(movArray.length < 11 && movArray.length > 0){
-              console.log("array length %d", movArray.length);
-              var index = movArray.length - 1;
-              GetMoviePosterPath(movArray, index,res, req);
-              //console.log("Sequential? hopefully comes after movie poster path");
-            
-          //console.log();
-          }else{
-            res.send("Too many or too few movies to render");
-            console.log(movArray.length);
-          }
-          
-        }
-      });
-    }
-    else
-    {
-      res.render("index", {movies:null, loggedOn: isLogged});
-    }
-  });
-
-};
-
-function GetMoviePosterPath(movArray, index, res, req){
-    if(index > -1)
-    {
-      if(!movArray[index].movie_id)
-      {
-        movArray[index].movie_id = 419430;
-      }
-      reqString = "https://api.themoviedb.org/3/movie/"+movArray[index].movie_id+"?api_key="+process.env.TMDB_KEY;
-      request(reqString, function(error, response, body){
-        if(!error && response.statusCode == 200){
-          var info = JSON.parse(body);
-          console.log(info.poster_path);
-  
-          movArray[index].poster_path = info.poster_path;
-          
-          GetMoviePosterPath(movArray,index-1,res, req);
-        }
-        if(error){
-          console.log(error);
-        }
-        if(response.statusCode !== 200){
-          console.log(response.statusCode);
-        }
-        return null;
-      });
-      
-    } else {
-      console.log("printing poster path of 0th object");
-      console.log(movArray[0].poster_path);
-      movieArray = movArray;
-      isMovieDataCached = true;
-      res.render("index", {movies : movArray, loggedOn : isLogged, base_url:base_url, csrfToken:req.csrfToken()});
-    }
-    
-  
-  }
+          console.log("Database not found");
+          res.render("index", {movies:null, loggedOn: isLogged});
+        }    
+    });  
+}
