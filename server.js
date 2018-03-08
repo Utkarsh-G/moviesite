@@ -80,24 +80,6 @@ var initDb = function(callback) {
   });
 };
 
-function initMovieNights(){
-  if (db)
-  {
-    db.collection("movienights").insertMany(
-      [{moviesDBname: "movies", hashkey: hashKeyDB},
-      {moviesDBname: "moviesMarch18", hashkey: hashKeyDB2}],
-       function(err, r){
-      if(err)
-      {
-        console.log("Failed to insert movie nights info");
-        console.log(err);
-      }
-      else
-      { 
-        console.log("Successfully inserted MovieNights db info");
-      }});
-    }};
-
 console.log("Trying to init DB");
 
 if (!db) {
