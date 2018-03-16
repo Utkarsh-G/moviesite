@@ -74,7 +74,7 @@ var initDb = function(callback) {
     if (db) {
       initdbs.initMovies(false, null);
       initdbs.initUsers();
-      initMovieNights();
+      //initMovieNights();
     }
 
   });
