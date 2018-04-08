@@ -18,12 +18,15 @@ module.exports = (app) => {
       
     var isMatch = false;
     var movieDBname = "";
+    let movieNightDate = "";
     console.log("Trying to find the right movie night to log into");
       mnArray.forEach(function(mnight){
         console.log(mnight);
         if(bcrypt.compareSync(req.body.logInfo.key, mnight.hashkey)){
           isMatch = true;
           movieDBname = mnight.moviesDBname;
+          movieNightDate = mnight.date;
+          
           console.log("found movie night match");
         }
       });
@@ -44,6 +47,7 @@ module.exports = (app) => {
             req.session.userID = newUser.ops[0]._id; //want to hash it tbh
             req.session.userName = newUser.ops[0].name;
             req.session.movieDBname = movieDBname;
+            req.session.movieDate = movieNightDate;
             res.redirect("/movies");
           }
         });

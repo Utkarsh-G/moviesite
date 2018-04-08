@@ -4,7 +4,9 @@
   "description": "Movie Night website for easy movie selection among friends",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "start-dev": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -30,5 +32,8 @@
     "moviedb": "^0.2.10",
     "pug": "^2.0.0-rc.4",
     "request": "^2.83.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.3"
   }
 }

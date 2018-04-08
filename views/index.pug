@@ -4,7 +4,7 @@ html.no-js(lang="en")
 body
     include ./menu.pug
     .ui.container
-        h1="All da movies!"
+        h1="Movie Night! To be held on: " + date
         if (movies)
             a(href="/movies/new").ui.black.fluid.button#addMovie Add Movie
             .ui.four.doubling.stackable.cards
