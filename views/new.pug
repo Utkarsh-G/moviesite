@@ -22,6 +22,7 @@ body
                         img(src=base_url+"w154/"+search.poster_path)
                     p Release Date: #{search.date}
                     form(action="/movies", method="POST").ui.form
+                        input(type="text", name="desc", maxlength="250" placeholder="Describe the appeal of the movie (without spoilers please)")
                         input(type="hidden", name="ID", value=search.ID)
                         input(type="hidden", name="_csrf", value=csrfToken)
                         input(type="submit" value="Add Movie").ui.violet.basic.button

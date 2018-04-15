@@ -23,10 +23,10 @@ exports.initMovies = function(shouldRedirectToMovies, resHTTP){
             else {
               console.log("Prev movie data deleted successfully. Creating new movie data.");
               
-              addmovie.addMovieFromTMDB(348, ()=>{
-                addmovie.addMovieFromTMDB(284054, ()=>{
-                  addmovie.addMovieFromTMDB(244786, ()=>{
-                    addmovie.addMovieFromTMDB(858, ()=>{
+              addmovie.addMovieFromTMDB(348, "Sci-fi + horror. I haven't even seen it yet.", "admin", ()=>{
+                addmovie.addMovieFromTMDB(284054, "It's so popular, who hasn't seen it yet? Movie so nice, I watched it twice", "admin", ()=>{
+                  addmovie.addMovieFromTMDB(244786, "As my friend Dougle described it: An art movie filmed like a war movie", "admin", ()=>{
+                    addmovie.addMovieFromTMDB(858, "Standard romcom fare. Feel-good movie of its year.", "admin", ()=>{
                       console.log("successfully added all four init movies");
                       if (shouldRedirectToMovies)
                       resHTTP.redirect("/movies");

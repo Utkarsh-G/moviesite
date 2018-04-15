@@ -2,7 +2,7 @@ var mdb = require('./database');
 var request = require('request');
 
 //module.exports = function addMovieFromTMDB
-exports.addMovieFromTMDB = function    (movie_id, funcIfSuccess, funcIfFail, PostRes, movieDBname){
+exports.addMovieFromTMDB = function    (movie_id, desc, auth, funcIfSuccess, funcIfFail, PostRes, movieDBname){
     reqString = "https://api.themoviedb.org/3/movie/"+movie_id+"?api_key="+process.env.TMDB_KEY
   
     request(reqString, function(error, response, body){
@@ -16,6 +16,8 @@ exports.addMovieFromTMDB = function    (movie_id, funcIfSuccess, funcIfFail, Pos
           poster_path : info.poster_path,
           runtime : info.runtime,
           overview : info.overview,
+          desc: desc,
+          auth: auth,
         };
 
         var db = mdb.GetDB();
