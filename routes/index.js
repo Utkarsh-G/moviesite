@@ -1,7 +1,7 @@
 var mdb = require('../services/database');
 var base_url = "https://image.tmdb.org/t/p/";
 
-module.exports = (mongodb, app) => { 
+module.exports = (app) => { 
   app.get("/movies", function(req,res){
     console.log("entering /movies route");
     if (!(req.session && req.session.userID)){

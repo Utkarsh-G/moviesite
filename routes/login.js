@@ -19,6 +19,7 @@ module.exports = (app) => {
     var isMatch = false;
     var movieDBname = "";
     let movieNightDate = "";
+    let foodDBname = "";
     console.log("Trying to find the right movie night to log into");
       mnArray.forEach(function(mnight){
         console.log(mnight);
@@ -26,6 +27,7 @@ module.exports = (app) => {
           isMatch = true;
           movieDBname = mnight.moviesDBname;
           movieNightDate = mnight.date;
+          foodDBname = mnight.foodDBname;
           
           console.log("found movie night match");
         }
@@ -48,6 +50,7 @@ module.exports = (app) => {
             req.session.userName = newUser.ops[0].name;
             req.session.movieDBname = movieDBname;
             req.session.movieDate = movieNightDate;
+            req.session.foodDBname = foodDBname;
             res.redirect("/movies");
           }
         });

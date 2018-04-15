@@ -1,0 +1,29 @@
+doctype html
+html.no-js(lang="en")
+    include ./header.pug
+body
+    include ./menu.pug
+    .ui.container
+        h1 This is where Food shows up
+        if (food)
+            each foodStuff, i in food
+                p #{foodStuff.user} is bringing a #{foodStuff.type}. "#{foodStuff.desc}"
+        form(action="/food", method="POST").ui.form
+            .inline.fields
+                label Select food category:
+                .field
+                    .ui.radio.checkbox
+                        input(name="foodType" type="radio" value="snack")
+                        label Snack
+                .field
+                    .ui.radio.checkbox
+                        input(name="foodType" type="radio" value="drink")
+                        label Drink
+                .field
+                    .ui.radio.checkbox
+                        input(name="foodType" type="radio" value="dessert")
+                        label Dessert
+            label Description:
+            input(type="text" name="desc" maxlength="250" placeholder="Veggie? Alcoholic? Five-layered trifle? Describe it here.")
+            input(type="hidden" name="_csrf" value=csrfToken)
+            input(type="submit" value="Add Food").ui.violet.basic.button

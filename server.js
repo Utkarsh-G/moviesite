@@ -95,13 +95,17 @@ require('./routes/home')(app);
 
 //RESTful Routes ... eventually
 //INDEX route
-require('./routes/index')(mongodb, app);
+require('./routes/index')(app);
+
+require('./routes/food')(app);
 
 //NEW route
 require('./routes/new')(app,base_url);
 
 //CREATE route
 require('./routes/create')(app);
+
+require('./routes/createfood')(app);
 
 //SHOW route
 require('./routes/show')(app, base_url);
