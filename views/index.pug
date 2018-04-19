@@ -32,12 +32,14 @@ body
                     button.ui.red.basic.button Reset movie database (!)
             img(src="/TMDBlogo.png").ui.small.right.floated.image
             if (comments)
-                p Comments found!
-                each comment, i in comments
-                    p #{comment.text} - #{comment.user}
+                h2 Comments
+                .ui.piled.segments
+                    .ui.segment
+                        each comment, i in comments
+                            p #{comment.text} - #{comment.user}
                 form(action="/comments", method="POST").ui.form
-                    label Gonna be late? Don't like the date? Need a ride from Kipling? Post here:
-                    input(type="text" name="text" maxlength="350" placeholder="your comment here")
+                    h2 Add Comment
+                    input(type="text" name="text" maxlength="350" placeholder="Gonna be late? Don't like the date? Need a ride from Kipling?")
                     input(type="hidden" name="_csrf" value=csrfToken)
                     input(type="submit" value="Add Comment").ui.violet.basic.button
         else

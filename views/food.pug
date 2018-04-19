@@ -4,11 +4,14 @@ html.no-js(lang="en")
 body
     include ./menu.pug
     .ui.container
-        h1 This is where Food shows up
+        h1 Edibles and Drinkables
         if (food)
-            each foodStuff, i in food
-                p #{foodStuff.user} is bringing a #{foodStuff.type}. "#{foodStuff.desc}"
+            .ui.raised.segments
+                .ui.segment
+                    each foodStuff, i in food
+                        p #{foodStuff.user} is bringing a #{foodStuff.type}. "#{foodStuff.desc}"
         form(action="/food", method="POST").ui.form
+            h2 Add Your Food!
             .inline.fields
                 label Select food category:
                 .field

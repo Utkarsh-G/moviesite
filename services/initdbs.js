@@ -28,8 +28,51 @@ exports.initMovies = function(shouldRedirectToMovies, resHTTP){
                   addmovie.addMovieFromTMDB(244786, "As my friend Dougle described it: An art movie filmed like a war movie", "admin", ()=>{
                     addmovie.addMovieFromTMDB(858, "Standard romcom fare. Feel-good movie of its year.", "admin", ()=>{
                       console.log("successfully added all four init movies");
-                      if (shouldRedirectToMovies)
-                      resHTTP.redirect("/movies");
+                      db.collection("food").insertOne({type: "snack", desc:"funyuns", user:"admin"}, function(err, r){
+                        if(err)
+                        {
+                        console.log("Failed to insert token food");
+                        console.log(err);
+                        }
+                        else
+                        {
+                        console.log("Successfully inserted token food");
+                        db.collection("food").drop(function(err, delOK){
+                            if (err)
+                            {
+                            console.log("Failed to delete foods");
+                            console.log(err);
+                            }
+                            else {
+                            console.log("Food reset");
+                            db.collection("comments").insertOne({text: "text", user:"admin"}, function(err, r){
+                                if(err)
+                                {
+                                console.log("Failed to insert token comment");
+                                console.log(err);
+                                }
+                                else
+                                {
+                                console.log("Successfully inserted token comment");
+                                db.collection("comments").drop(function(err, delOK){
+                                    if (err)
+                                    {
+                                    console.log("Failed to delete comments");
+                                    console.log(err);
+                                    }
+                                    else {
+                                    console.log("Comments reset");
+                                    if (shouldRedirectToMovies)
+                                    resHTTP.redirect("/movies");
+                                    }
+                                });      
+                                }      
+                        });
+                            }
+                        });      
+                        }      
+                });
+                    
                     },()=>{console.log("failed to add fourth init movie");},null,"movies");
                   },()=>{console.log("failed to add third init movie");},null,"movies");
                 },()=>{console.log("failed to add second init movie");},null,"movies");
