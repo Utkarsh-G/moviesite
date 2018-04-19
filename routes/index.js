@@ -16,7 +16,7 @@ module.exports = (app) => {
         var db = mdb.GetDB();
         if (db)
         {
-          movies = db.collection(req.session.movieDBname);
+          const movies = db.collection(req.session.movieDBname);
           movies.find().toArray(function(err, movArray){
             if(err)
             {
@@ -27,8 +27,23 @@ module.exports = (app) => {
             }
             else
             {
-              var hasDisplayReset = (req.session.movieDBname === "movies") || (req.session.userName === "Utkarsh Gaur");
-              return res.render("index", {movies : movArray, date: req.session.movieDate, displayReset: hasDisplayReset, loggedOn : isLogged, base_url: base_url, csrfToken:req.csrfToken()});
+              const comments = db.collection(req.session.commentsDBname);
+              comments.find().toArray(function(err, commArray){
+                if(err)
+                {
+                  console.log("error in finding comments array from local db:");
+                  console.log(err);
+                  return res.render("index", {comments: null, movies : movArray, date: req.session.movieDate, displayReset: hasDisplayReset, loggedOn : isLogged, base_url: base_url, csrfToken:req.csrfToken()});
+                  return;
+                }
+                else
+                {
+                  var hasDisplayReset = (req.session.movieDBname === "movies") || (req.session.userName === "Utkarsh Gaur");
+                  return res.render("index", {comments: commArray, movies : movArray, date: req.session.movieDate, displayReset: hasDisplayReset, loggedOn : isLogged, base_url: base_url, csrfToken:req.csrfToken()});
+                  
+                }
+
+              });
               
             }
           });
