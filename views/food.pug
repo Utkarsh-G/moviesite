@@ -6,7 +6,7 @@ body
     .ui.container
         h1 Edibles and Drinkables
         if (food)
-            .ui.raised.segments
+            .ui.piled.segments
                 .ui.segment
                     each foodStuff, i in food
                         p #{foodStuff.user} is bringing a #{foodStuff.type}. "#{foodStuff.desc}"
