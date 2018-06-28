@@ -31,6 +31,18 @@ body
                     input(type="hidden", name="_csrf", value=csrfToken)        
                     button.ui.red.basic.button Reset movie database (!)
             img(src="/TMDBlogo.png").ui.small.right.floated.image
+            if (guests)
+                h2 Guest List
+                .ui.piled.segments
+                    .ui.segment
+                        p
+                            each guest, i in guests
+                                |#{guest.name}
+                                if (i < guests.length-1)
+                                    |, 
+                form(action="/guests", method="POST").ui.form
+                    input(type="hidden" name="_csrf" value=csrfToken)
+                    input(type="submit" value="Confirm Attendance").ui.violet.basic.button
             if (comments)
                 h2 Comments
                 .ui.piled.segments
@@ -41,6 +53,7 @@ body
                     h2 Add Comment
                     input(type="text" name="text" maxlength="350" placeholder="Gonna be late? Don't like the date? Need a ride from Kipling?")
                     input(type="hidden" name="_csrf" value=csrfToken)
+                    p
                     input(type="submit" value="Add Comment").ui.violet.basic.button
         else
             p No Movies Found

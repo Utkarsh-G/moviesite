@@ -21,6 +21,7 @@ module.exports = (app) => {
     let movieNightDate = "";
     let foodDBname = "";
     let commentsDBname = "";
+    let guestsDBname = "";
     console.log("Trying to find the right movie night to log into");
       mnArray.forEach(function(mnight){
         console.log(mnight);
@@ -30,6 +31,7 @@ module.exports = (app) => {
           movieNightDate = mnight.date;
           foodDBname = mnight.foodDBname;
           commentsDBname = mnight.commentsDBname;
+          guestsDBname = mnight.guestsDBname;
           
           console.log("found movie night match");
         }
@@ -54,6 +56,7 @@ module.exports = (app) => {
             req.session.movieDate = movieNightDate;
             req.session.foodDBname = foodDBname;
             req.session.commentsDBname = commentsDBname;
+            req.session.guestsDBname = guestsDBname;
             res.redirect("/movies");
           }
         });

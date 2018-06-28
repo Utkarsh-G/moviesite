@@ -109,6 +109,8 @@ require('./routes/createfood')(app);
 
 require('./routes/createcomment')(app);
 
+require('./routes/createguest')(app);
+
 //SHOW route
 require('./routes/show')(app, base_url);
 

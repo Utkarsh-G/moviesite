@@ -10,8 +10,8 @@ exports.addComment = function    (comment, commentDBname, funcIfSuccess, funcIfF
         if(err){
           console.log("Error in trying to add new comment");
           console.log(err);
-          return false;
           funcIfFail(PostRes);
+          return false;
         }
         else
         {

@@ -60,7 +60,28 @@ module.exports = (app) => {
                                     }
                                     else {
                                     console.log("Comments reset");
-                                    res.redirect("/movies");
+                                    db.collection(req.session.guestsDBname).insertOne({name:"admin"}, function(err, r){
+                                        if(err)
+                                        {
+                                        console.log("Failed to insert token guest");
+                                        console.log(err);
+                                        }
+                                        else
+                                        {
+                                        console.log("Successfully inserted token guest");
+                                        db.collection(req.session.guestsDBname).drop(function(err, delOK){
+                                            if (err)
+                                            {
+                                            console.log("Failed to delete guests");
+                                            console.log(err);
+                                            }
+                                            else {
+                                            console.log("guests reset");
+                                            res.redirect("/movies");
+                                            }
+                                        });      
+                                        }      
+                                });
                                     }
                                 });      
                                 }      
