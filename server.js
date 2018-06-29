@@ -1,8 +1,6 @@
-//  OpenShift sample Node application
 var express       = require('express'),
     app           = express(),
     bodyParser    = require('body-parser'),
-    mdb           = require('moviedb')('f966801bba64717541e531a67551ed33'),
     methodOv      = require("method-override"),
     expSanitizer  = require("express-sanitizer"),
     mongodb       = require('mongodb').MongoClient,
@@ -40,7 +38,7 @@ app.use(sessions({
 app.use(csurf());
 app.use(sslRedirect());
 
-var hashKeyDB = bcrypt.hashSync(process.env.SITE_PASSKEY, 14); //needs to be env var or database
+var hashKeyDB = bcrypt.hashSync(process.env.SITE_PASSKEY, 14); 
 var hashKeyDB2 = bcrypt.hashSync(process.env.SITE_PASSKEY2, 14);
 
 var port = process.env.PORT || portLocal,
@@ -74,6 +72,7 @@ var initDb = function(callback) {
     if (db) {
       initdbs.initMovies(false, null);
       initdbs.initUsers();
+      initdbs.initKeys(hashKeyDB, hashKeyDB2);
       //initMovieNights();
     }
 
@@ -83,6 +82,7 @@ var initDb = function(callback) {
 console.log("Trying to init DB");
 
 if (!db) {
+  console.log("Starting db init");
   initDb(function(err){
     if (err)
     console.log('Error connecting to Mongo. Message:\n'+err);

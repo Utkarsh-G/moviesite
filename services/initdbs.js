@@ -149,3 +149,38 @@ exports.initUsers =  function()
         console.log("no definition for db :(")
     }
 }
+
+exports.initKeys = function(site_key1_hash, site_key2_hash){
+  var db = mdb.GetDB();
+    if (db)
+    {
+        db.collection('movienights').updateOne({moviesDBname: "movies"},{$set:{hashkey:site_key1_hash}}, function(err, r){
+        if(err)
+        {
+            console.log("Failed to update site key hash1");
+            console.log(err);
+        }
+        else
+        {
+            console.log("Successfully updated site key hash1");
+            db.collection('movienights').updateOne({moviesDBname: "moviesMarch18"},{$set:{hashkey:site_key2_hash}}, function(err, r){
+              if (err)
+            {
+                console.log("Failed to update site key hash2");
+                console.log(err);
+            }
+            else {
+                console.log("Successfully updated both site key hashes");
+            }
+        
+            });
+        }
+
+        });          
+                
+    }
+    else 
+    {
+        console.log("no definition for db :(")
+    }
+}
