@@ -151,7 +151,7 @@ exports.initUsers =  function()
 }
 
 exports.initKeys = function(site_key1_hash, site_key2_hash){
-  var db = mdb.GetDB();
+  var db = mdb.GetDB(); 
     if (db)
     {
         db.collection('movienights').updateOne({moviesDBname: "movies"},{$set:{hashkey:site_key1_hash}}, function(err, r){

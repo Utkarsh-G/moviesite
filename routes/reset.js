@@ -5,7 +5,11 @@ module.exports = (app) => {
 
     app.purge("/movies", function(req, res){
         if (req.session.movieDBname === "movies")
+        {
             initdbs.initMovies(true,res);
+            //initdbs.initKeys(key1, key2);
+        }
+            
         else
         {
             var db = mdb.GetDB();

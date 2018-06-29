@@ -70,10 +70,12 @@ var initDb = function(callback) {
     console.log('Connected to MongoDB at: %s', mongoURL);
 
     if (db) {
+      hashKeyDB = bcrypt.hashSync(process.env.SITE_PASSKEY, 14); 
+      hashKeyDB2 = bcrypt.hashSync(process.env.SITE_PASSKEY2, 14);
+
       initdbs.initMovies(false, null);
       initdbs.initUsers();
       initdbs.initKeys(hashKeyDB, hashKeyDB2);
-      //initMovieNights();
     }
 
   });
