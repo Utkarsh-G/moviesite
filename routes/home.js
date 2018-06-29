@@ -23,7 +23,7 @@ module.exports = (app) => { app.get('/', function (req, res) {
       if(response.statusCode !== 200){
         console.log(response.statusCode);
       }
-      return res.render('home',{loggedOn:isLogged, csrfToken: req.csrfToken()});
+      return res.render('home',{wrongLogin: false, loggedOn:isLogged, csrfToken: req.csrfToken()});
     });
   });
 

@@ -12,7 +12,7 @@ i.icon{
 }
 
 #addMovie{
-    margin-bottom: 20px;
+    margin-bottom: 20px;   
 }
 
 #resetForm{
@@ -29,4 +29,43 @@ i.icon{
 
 #copyright{
     margin-top:30px;
+}
+
+.warning{
+    color: red;
+}
+
+.ui.container.mainBody{
+    margin-bottom: 20px;
+}
+
+.ui.violet.button:not(.fluid){
+    width: 194px;
+}
+
+.ui.violet.button:hover{
+    background-color: black;
+}
+
+.ui.violet.button:active{
+    background-color: white;
+    color: #6435C9;
+}
+
+.ui.violet.fluid.button:hover{
+    background-color: #6435C9;
+}
+
+.ui.violet.fluid.button:active{
+    background-color: white;
+    color: #6435C9;
+}
+
+.ui.red.button:hover{
+    background-color: black;
+}
+
+.ui.red.button:active{
+    background-color: white;
+    color: red;
 }

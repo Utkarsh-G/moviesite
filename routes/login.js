@@ -64,7 +64,7 @@ module.exports = (app) => {
       else
       {
         console.log("Incorrect login");
-        res.redirect("/");
+        res.redirect("/wronglogin");
       }
     });
   });

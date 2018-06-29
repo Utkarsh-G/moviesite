@@ -92,6 +92,7 @@ if (!db) {
 //Landing page / home page
 
 require('./routes/home')(app);
+require('./routes/wronglogin')(app);
 
 //RESTful Routes ... eventually
 //INDEX route

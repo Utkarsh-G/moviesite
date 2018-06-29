@@ -3,10 +3,9 @@ html.no-js(lang="en")
     include ./header.pug
 body
     include ./menu.pug
-    .ui.container
+    .ui.container.mainBody
         h1="Movie Night! To be held on: " + date
         if (movies)
-            a(href="/movies/new").ui.black.fluid.button#addMovie Add Movie
             .ui.four.doubling.stackable.cards
                 each movie, i in movies
                     .ui.card
@@ -17,19 +16,21 @@ body
                         - var linkstr = "/movies/" + movie._id;
                         form(action="/movies/"+movie._id, method="GET")
                             input(type="hidden", name="_csrf", value=csrfToken)        
-                            button.ui.blue.basic.fluid.button Read More
+                            button.ui.inverted.violet.fluid.button Read More
                         form(action="/movies/"+movie._id+"/vote", method="POST")
                             input(type="hidden", name="_csrf", value=csrfToken)        
-                            button.ui.blue.basic.fluid.button Vote for this movie!
+                            button.ui.inverted.violet.fluid.button Vote for this movie!
                         if(movie.voters)
                             .ui.container
                                 .ui.black.left.floated.label Selected by:
                                 each voter, j in movie.voters
                                     .ui.right.floated.label #{voter}
+            p
+            a(href="/movies/new").ui.violet.button#addMovie Add Movie
             if (displayReset)
                 form(action="/movies?_method=PURGE", method="POST").ui.form#resetForm
                     input(type="hidden", name="_csrf", value=csrfToken)        
-                    button.ui.red.basic.button Reset movie database (!)
+                    button.ui.red.button Reset all app data (!)
             img(src="/TMDBlogo.png").ui.small.right.floated.image
             if (guests)
                 h2 Guest List
@@ -42,7 +43,7 @@ body
                                     |, 
                 form(action="/guests", method="POST").ui.form
                     input(type="hidden" name="_csrf" value=csrfToken)
-                    input(type="submit" value="Confirm Attendance").ui.violet.basic.button
+                    input(type="submit" value="Confirm Attendance").ui.violet.button
             if (comments)
                 h2 Comments
                 .ui.piled.segments
@@ -51,10 +52,10 @@ body
                             p #{comment.text} - #{comment.user}
                 form(action="/comments", method="POST").ui.form
                     h2 Add Comment
-                    input(type="text" name="text" maxlength="350" placeholder="Gonna be late? Don't like the date? Need a ride from Kipling?")
+                    input(type="text" name="text" maxlength="350" placeholder="Gonna be late? Don't like the date? Need a ride from Kipling?" required)
                     input(type="hidden" name="_csrf" value=csrfToken)
                     p
-                    input(type="submit" value="Add Comment").ui.violet.basic.button
+                    input(type="submit" value="Add Comment").ui.violet.button
         else
             p No Movies Found
         

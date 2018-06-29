@@ -21,31 +21,42 @@ app.post("/movies/:id/vote", (req,res)=>{
         console.log("\n\nFound by ID");
         console.log(foundMovie);
         var voters = [];
+        let hasVoterListChanged = false;
         if(foundMovie.voters)
           {
             voters = foundMovie.voters; 
-            if(voters.length<21)
-            voters.push(req.session.userName);
+            if(voters.length<21 && (voters.indexOf(req.session.userName)===-1)){
+              voters.push(req.session.userName);
+              hasVoterListChanged = true;
+            }
+            
           }
         else
-          voters =[req.session.userName];
-  
-        movies.updateOne({_id: ObjectId(req.params.id)}, {$set:{
-          voters:voters
-        }}, function(err, r){
-          if(err)
           {
-            console.log("\n\nError in updating movie voter list");
-            console.log(err);
-            res.send("Vote not registered (update error). Woopsie.");
+            voters =[req.session.userName];
+            hasVoterListChanged = true;
           }
-          else
-          {
-            console.log("\n\nUpdated by ID");
-            res.redirect("/movies");
-          }
-      
-        });
+          
+        if(hasVoterListChanged)
+        {
+          movies.updateOne({_id: ObjectId(req.params.id)}, {$set:{
+            voters:voters
+          }}, function(err, r){
+            if(err)
+            {
+              console.log("\n\nError in updating movie voter list");
+              console.log(err);
+              res.send("Vote not registered (update error). Woopsie.");
+            }
+            else
+            {
+              console.log("\n\nUpdated by ID");
+              res.redirect("/movies");
+            }
+        
+          });
+        }
+        
         
       }
     });

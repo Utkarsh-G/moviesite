@@ -13,8 +13,10 @@ body
                 label Release Year (Optional)
                 input(type="text", name="movieYear", placeholder="year")
             input(type="hidden", name="_csrf", value=csrfToken)
-            input(type="submit" value="Search").ui.violet.basic.button
-        if(searches && searches.length > 0)
+            input(type="submit" value="Search").ui.violet.button
+        if(searches)
+            p
+            p Showing #{searches.length} matching movie(s).
             each search in searches
                 .ui.segment
                     p Movie Name: #{search.name}
@@ -25,5 +27,5 @@ body
                         input(type="text", name="desc", maxlength="250" placeholder="Describe the appeal of the movie (without spoilers please)")
                         input(type="hidden", name="ID", value=search.ID)
                         input(type="hidden", name="_csrf", value=csrfToken)
-                        input(type="submit" value="Add Movie").ui.violet.basic.button
+                        input(type="submit" value="Add Movie").ui.violet.button
         img(src="/TMDBlogo.png").ui.small.right.floated.image

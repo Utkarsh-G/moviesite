@@ -12,6 +12,8 @@ body
                 p This site uses cookies to maintain sessions
             form(action="/login", method="POST").ui.form
                 //- csrf token goes here
+                if(wrongLogin)
+                    h4.warning Incorrect Login Credentials
                 .field
                     label Name (any identifier)
                     input(type="text", name="logInfo[name]", placeholder="name", required="true")

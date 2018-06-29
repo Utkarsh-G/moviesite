@@ -22,7 +22,7 @@ exports.addMovieFromTMDB = function    (movie_id, desc, auth, funcIfSuccess, fun
 
         var db = mdb.GetDB();
         var movies = db.collection(movieDBname);
-        movies.insertOne(movie, function(err, newMov){
+        movies.updateOne({movie_id:info.id},{$set:movie},{upsert:true}, function(err, newMov){
         if(err){
           console.log("Error in trying to add new movie");
           console.log(err);

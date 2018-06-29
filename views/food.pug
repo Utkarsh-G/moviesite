@@ -3,7 +3,7 @@ html.no-js(lang="en")
     include ./header.pug
 body
     include ./menu.pug
-    .ui.container
+    .ui.container.mainBody
         h1 Edibles and Drinkables
         if (food)
             .ui.piled.segments
@@ -16,7 +16,7 @@ body
                 label Select food category:
                 .field
                     .ui.radio.checkbox
-                        input(name="foodType" type="radio" value="snack")
+                        input(name="foodType" type="radio" value="snack" required)
                         label Snack
                 .field
                     .ui.radio.checkbox
@@ -27,6 +27,7 @@ body
                         input(name="foodType" type="radio" value="dessert")
                         label Dessert
             label Description:
-            input(type="text" name="desc" maxlength="250" placeholder="Veggie? Alcoholic? Five-layered trifle? Describe it here.")
+            input(type="text" name="desc" maxlength="250" placeholder="Veggie? Alcoholic? Five-layered trifle? Describe it here." required)
             input(type="hidden" name="_csrf" value=csrfToken)
-            input(type="submit" value="Add Food").ui.violet.basic.button
+            p
+            input(type="submit" value="Add Food").ui.violet.button
